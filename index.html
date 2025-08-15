@@ -1,82 +1,30 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KingCast Podcast</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .cover {
-            display: block;
-            margin: 0 auto 20px auto;
-            max-width: 200px;
-            border-radius: 10px;
-        }
-        .podcast {
-            background: #fff;
-            padding: 15px;
-            margin: 15px auto;
-            border-radius: 10px;
-            max-width: 600px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        audio {
-            width: 100%;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-    <h1>🎙️ KingCast Podcast</h1>
-    <img src="kingCast.png" alt="Capa do Podcast" class="cover">
+function doGet(e) {
+  try {
+    // Abra sua planilha pelo ID
+    var ss = SpreadsheetApp.openById('19bu1iLfR3sNvrlpBnNiG71c9iwq6J0izpZf4Ag8iOP0');
 
-    <!-- Lista de episódios -->
-    <div class="podcast">
-        <h2>A Eternidade de Deus</h2>
-        <audio controls>
-            <source src="a%20eternidade%20de%20deus.mp3" type="audio/mpeg">
-            Seu navegador não suporta áudio HTML5.
-        </audio>
-    </div>
-<div class="podcast">
-        <h2>O poder de Deus</h2>
-        <audio controls>
-            <source src="a%20eternidade%20de%20deus.mp3" type="audio/mpeg">
-            Seu navegador não suporta áudio HTML5.
-        </audio>
-    </div>
-    <div class="podcast">
-        <h2>A Forma de Deus</h2>
-        <audio controls>
-            <source src="a%20forma%20de%20deus.mp3" type="audio/mpeg">
-            Seu navegador não suporta áudio HTML5.
-        </audio>
-    </div>
+    // Troque o nome da aba se for diferente. Se não existir, usa a primeira.
+    var sheet = ss.getSheetByName('Página1');
+    if (!sheet) sheet = ss.getSheets()[0];
 
-    <div class="podcast">
-        <h2>Personalidade de Deus</h2>
-        <audio controls>
-            <source src="personalidade%20de%20deus.mp3" type="audio/mpeg">
-            Seu navegador não suporta áudio HTML5.
-        </audio>
-    </div>
+    // Garante que e.parameter exista (evita erro ao rodar pelo menu "Executar")
+    var p = (e && e.parameter) ? e.parameter : {};
 
-    <div class="podcast">
-        <h2>A Grandeza de Deus</h2>
-        <audio controls>
-            <source src="A%20gradeza%20de%20Deus.mp3" type="audio/mpeg">
-            Seu navegador não suporta áudio HTML5.
-        </audio>
-    </div>
+    var data = new Date();
+    var ip = p.ip || '';
+    var cidade = p.cidade || '';
+    var pais = p.pais || '';
+    var navegador = p.navegador || '';
 
-</body>
-</html>
+    sheet.appendRow([data, ip, cidade, pais, navegador]);
+
+    return ContentService
+      .createTextOutput('OK')
+      .setMimeType(ContentService.MimeType.TEXT);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput('ERRO: ' + err.message)
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
+}
