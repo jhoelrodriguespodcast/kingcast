@@ -1,21 +1,90 @@
-<script>
-  // URL do seu Apps Script (nova)
-  const scriptURL = "https://script.google.com/macros/s/AKfycbx6yqm4LL3e31ESKHL7DVUnCncy6ynfvIinI85UGtTrIVEnFVPVqJkxEPzuwixYGg9S2w/exec";
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KingCast Podcast</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .podcast {
+            background: #fff;
+            padding: 15px;
+            margin: 15px auto;
+            border-radius: 10px;
+            max-width: 600px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .cover {
+            display: block;
+            margin: 0 auto 20px auto;
+            max-width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <h1>🎙️ KingCast Podcast</h1>
 
-  function registrarVisita(ip, cidade, pais) {
-    const nav = navigator.userAgent || '';
-    const url = scriptURL + 
-      '?ip=' + encodeURIComponent(ip) + 
-      '&cidade=' + encodeURIComponent(cidade) + 
-      '&pais=' + encodeURIComponent(pais) + 
-      '&navegador=' + encodeURIComponent(nav);
+    <img src="kingCast.png" alt="Capa do Podcast" class="cover">
 
-    fetch(url).catch(console.error);
-  }
+    <div class="podcast">
+        <h2>A Eternidade de Deus</h2>
+        <audio controls>
+            <source src="a%20eternidade%20de%20deus.mp3" type="audio/mpeg">
+            Seu navegador não suporta áudio HTML5.
+        </audio>
+    </div>
 
-  // Busca IP/cidade/país e envia
-  fetch('https://ipapi.co/json/')
-    .then(r => r.json())
-    .then(d => registrarVisita(d.ip, d.city, d.country_name))
-    .catch(() => registrarVisita('','', ''));
-</script>
+    <div class="podcast">
+        <h2>A Forma de Deus</h2>
+        <audio controls>
+            <source src="a%20forma%20de%20deus.mp3" type="audio/mpeg">
+            Seu navegador não suporta áudio HTML5.
+        </audio>
+    </div>
+
+    <div class="podcast">
+        <h2>Personalidade de Deus</h2>
+        <audio controls>
+            <source src="personalidade%20de%20deus.mp3" type="audio/mpeg">
+            Seu navegador não suporta áudio HTML5.
+        </audio>
+    </div>
+
+    <script>
+        // URL do seu Apps Script
+        const scriptURL = "https://script.google.com/macros/s/AKfycbx6yqm4LL3e31ESKHL7DVUnCncy6ynfvIinI85UGtTrIVEnFVPVqJkxEPzuwixYGg9S2w/exec";
+
+        function registrarVisita(ip, cidade, pais) {
+            const nav = navigator.userAgent || '';
+            const url = scriptURL + 
+                '?ip=' + encodeURIComponent(ip) + 
+                '&cidade=' + encodeURIComponent(cidade) + 
+                '&pais=' + encodeURIComponent(pais) + 
+                '&navegador=' + encodeURIComponent(nav);
+
+            fetch(url).catch(console.error);
+        }
+
+        // Busca IP/cidade/país e envia
+        fetch('https://ipapi.co/json/')
+            .then(r => r.json())
+            .then(d => registrarVisita(d.ip, d.city, d.country_name))
+            .catch(() => registrarVisita('','', ''));
+    </script>
+</body>
+</html>
