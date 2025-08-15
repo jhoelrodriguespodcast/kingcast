@@ -1,91 +1,76 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KingCast Podcast</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0; padding: 20px;
-    }
-    h1 {
-      text-align: center; color: #333;
-    }
-    .podcast {
-      background: #fff;
-      padding: 15px;
-      margin: 15px auto;
-      border-radius: 10px;
-      max-width: 600px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    audio {
-      width: 100%;
-      margin-top: 10px;
-    }
-    .cover {
-      display: block;
-      margin: 0 auto 20px auto;
-      max-width: 200px;
-      border-radius: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KingCast Podcast</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .cover {
+            display: block;
+            margin: 0 auto 20px auto;
+            max-width: 200px;
+            border-radius: 10px;
+        }
+        .podcast {
+            background: #fff;
+            padding: 15px;
+            margin: 15px auto;
+            border-radius: 10px;
+            max-width: 600px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-  <h1>🎙️ KingCast Podcast</h1>
-  <img src="KingCast.png" alt="Capa do Podcast KingCast" class="cover">
+    <h1>🎙️ KingCast Podcast</h1>
+    <img src="kingCast.png" alt="Capa do Podcast" class="cover">
 
-  <div id="podcast-list">Carregando episódios...</div>
-
-  <script>
-    const repoOwner = "jhoelrodriguespodcast";
-    const repoName = "kingcast";
-
-    async function loadEpisodes() {
-      const resp = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/`);
-      const files = await resp.json();
-
-      let episodes = [];
-
-      for (const file of files) {
-        if (file.name.toLowerCase().endsWith('.mp3')) {
-          const commitRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/commits?path=${encodeURIComponent(file.name)}&per_page=1`);
-          const commitData = await commitRes.json();
-          const date = new Date(commitData[0].commit.committer.date);
-
-          episodes.push({
-            title: file.name.replace(/\.mp3$/i, ''),
-            url: file.download_url,
-            date: date.getTime()
-          });
-        }
-      }
-
-      episodes.sort((a, b) => b.date - a.date);
-
-      const listEl = document.getElementById('podcast-list');
-      listEl.innerHTML = '';
-
-      episodes.forEach(ep => {
-        const div = document.createElement('div');
-        div.className = 'podcast';
-        div.innerHTML = `
-          <h2>${ep.title}</h2>
-          <audio controls>
-            <source src="${ep.url}" type="audio/mpeg">
+    <!-- Lista de episódios -->
+    <div class="podcast">
+        <h2>A Eternidade de Deus</h2>
+        <audio controls>
+            <source src="a%20eternidade%20de%20deus.mp3" type="audio/mpeg">
             Seu navegador não suporta áudio HTML5.
-          </audio>
-        `;
-        listEl.appendChild(div);
-      });
-    }
+        </audio>
+    </div>
 
-    loadEpisodes().catch(err => {
-      document.getElementById('podcast-list').innerText = 'Erro ao carregar episódios.';
-      console.error(err);
-    });
-  </script>
+    <div class="podcast">
+        <h2>A Forma de Deus</h2>
+        <audio controls>
+            <source src="a%20forma%20de%20deus.mp3" type="audio/mpeg">
+            Seu navegador não suporta áudio HTML5.
+        </audio>
+    </div>
+
+    <div class="podcast">
+        <h2>Personalidade de Deus</h2>
+        <audio controls>
+            <source src="personalidade%20de%20deus.mp3" type="audio/mpeg">
+            Seu navegador não suporta áudio HTML5.
+        </audio>
+    </div>
+
+    <div class="podcast">
+        <h2>A Grandeza de Deus</h2>
+        <audio controls>
+            <source src="A%20gradeza%20de%20Deus.mp3" type="audio/mpeg">
+            Seu navegador não suporta áudio HTML5.
+        </audio>
+    </div>
+
 </body>
 </html>
