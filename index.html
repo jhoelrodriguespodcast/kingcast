@@ -4,16 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KingCast Podcast</title>
-
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R6CCPYEBFJ"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-R6CCPYEBFJ');
-    </script>
-
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -38,6 +28,15 @@
             margin-top: 10px;
         }
     </style>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R6CCPYEBFJ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-R6CCPYEBFJ');
+    </script>
 </head>
 <body>
     <h1>🎙️ KingCast Podcast</h1>
@@ -66,5 +65,15 @@
         </audio>
     </div>
 
+    <!-- Registro da cidade e país -->
+    <script>
+        fetch("https://ipapi.co/json/")
+        .then(response => response.json())
+        .then(data => {
+            fetch("https://script.google.com/macros/s/AKfycbxAKwzUcFVRfgX6KGJtCXLCnZHWnubIXnjxal60tYR1DFQpBNQr9c5D9N6NcXPFze7UxQ/exec?cidade=" 
+                + encodeURIComponent(data.city) + "&pais=" + encodeURIComponent(data.country_name));
+        })
+        .catch(error => console.error("Erro ao obter localização:", error));
+    </script>
 </body>
 </html>
