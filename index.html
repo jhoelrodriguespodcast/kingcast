@@ -7,10 +7,10 @@
   <style>
     body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
     h1 { text-align: center; color: #333; }
-    h2 { margin-top: 30px; color: #444; }
+    h2 { color: #444; margin-top: 30px; }
     .podcast { background: #fff; padding: 15px; margin: 15px auto; border-radius: 10px; max-width: 600px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    audio { width: 100%; margin-top: 10px; }
-    .cover { display: block; margin: 0 auto 20px; max-width: 200px; border-radius: 10px; }
+    audio { width: 100%; margin-top: 5px; }
+    .cover { display: block; margin: 0 auto 10px; max-width: 100%; border-radius: 10px; }
   </style>
 </head>
 <body>
@@ -23,67 +23,50 @@
     const repoOwner = "jhoelrodriguespodcast";
     const repoName = "kingcast";
 
-    // Defina aqui os temas/pastas
-    const temas = ["deus", "reflexoes", "historia"];
-
     async function loadEpisodes() {
-      const container = document.getElementById("episodes");
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents`);
+        const items = await res.json();
 
-      for (const tema of temas) {
-        try {
-          // Busca os arquivos dentro da pasta do tema
-          const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${tema}`);
-          const files = await res.json();
+        // Filtra apenas pastas
+        const folders = items.filter(item => item.type === "dir");
 
-          // Filtra apenas mp3
-          const mp3Files = files.filter(file => file.name.toLowerCase().endsWith('.mp3'));
+        const container = document.getElementById("episodes");
 
-          if (mp3Files.length > 0) {
-            // Cria título da seção
-            const title = document.createElement("h2");
-            title.textContent = tema.charAt(0).toUpperCase() + tema.slice(1);
-            container.appendChild(title);
+        // Para cada pasta (tema)
+        for (const folder of folders) {
+          // Pega arquivos dentro da pasta
+          const resFolder = await fetch(folder.url);
+          const files = await resFolder.json();
 
-            for (const file of mp3Files) {
-              const div = document.createElement("div");
-              div.className = "podcast";
-              div.innerHTML = `
-                <h3>${file.name.replace(/\.mp3$/i, '')}</h3>
-                <audio controls>
-                  <source src="${file.download_url}" type="audio/mpeg">
-                  Seu navegador não suporta áudio HTML5.
-                </audio>
-              `;
-              container.appendChild(div);
-            }
-          }
-        } catch (err) {
-          console.error("Erro ao carregar episódios de", tema, err);
+          const mp3Files = files.filter(f => f.name.toLowerCase().endsWith(".mp3"));
+          if (mp3Files.length === 0) continue; // pula se não tiver áudio
+
+          // Cria seção com título da pasta
+          const section = document.createElement("div");
+          section.innerHTML = `<h2>📂 ${folder.name}</h2>`;
+          container.appendChild(section);
+
+          // Lista áudios
+          mp3Files.forEach(file => {
+            const div = document.createElement("div");
+            div.className = "podcast";
+            div.innerHTML = `
+              <h3>${file.name.replace(/\.mp3$/i, '')}</h3>
+              <audio controls>
+                <source src="${file.download_url}" type="audio/mpeg">
+                Seu navegador não suporta áudio HTML5.
+              </audio>
+            `;
+            section.appendChild(div);
+          });
         }
+      } catch (err) {
+        console.error("Erro ao carregar episódios:", err);
       }
     }
 
     loadEpisodes();
-
-    // Registro automático na planilha
-    fetch('https://ipapi.co/json/')
-      .then(response => response.json())
-      .then(data => {
-        const ip = data.ip || '';
-        const cidade = data.city || '';
-        const pais = data.country_name || '';
-        const navegador = navigator.userAgent || '';
-
-        fetch('https://script.google.com/macros/s/AKfycbyYbTICoPfv2gIyrJvNtID5PF3XH0a4SSo7FCjcOWV0sh2XiMB938yKKDEzFbO5mi6VtQ/exec'
-          + '?ip=' + encodeURIComponent(ip)
-          + '&cidade=' + encodeURIComponent(cidade)
-          + '&pais=' + encodeURIComponent(pais)
-          + '&navegador=' + encodeURIComponent(navegador)
-        )
-        .then(() => console.log('Visitante registrado com sucesso!'))
-        .catch(err => console.error('Erro ao enviar dados:', err));
-      })
-      .catch(err => console.error('Erro ao obter IP/localização:', err));
   </script>
 </body>
 </html>
