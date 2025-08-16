@@ -24,14 +24,11 @@
 
     async function loadEpisodes() {
       try {
-        // Pega lista de arquivos do repositório
         const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents`);
         const files = await res.json();
 
-        // Filtra apenas arquivos .mp3
         const mp3Files = files.filter(file => file.name.toLowerCase().endsWith('.mp3'));
 
-        // Pega datas de commit para cada arquivo
         const filesWithDate = await Promise.all(mp3Files.map(async file => {
           const commitRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/commits?path=${file.path}&per_page=1`);
           const commitData = await commitRes.json();
@@ -39,22 +36,31 @@
           return { ...file, date };
         }));
 
-        // Ordena por data (mais recente primeiro)
         filesWithDate.sort((a, b) => b.date - a.date);
 
-        // Monta HTML
         const container = document.getElementById("episodes");
-        filesWithDate.forEach(file => {
+        filesWithDate.forEach((file, index) => {
           const div = document.createElement("div");
           div.className = "podcast";
           div.innerHTML = `
             <h2>${file.name.replace(/\.mp3$/i, '')}</h2>
-            <audio controls>
+            <audio controls id="audio-${index}">
               <source src="${file.download_url}" type="audio/mpeg">
               Seu navegador não suporta áudio HTML5.
             </audio>
           `;
           container.appendChild(div);
+        });
+
+        // adiciona autoplay em sequência
+        const audios = document.querySelectorAll("audio");
+        audios.forEach((audio, i) => {
+          audio.addEventListener("ended", () => {
+            if (i + 1 < audios.length) {
+              audios[i + 1].play();
+              window.scrollTo({ top: audios[i + 1].parentElement.offsetTop - 20, behavior: 'smooth' });
+            }
+          });
         });
 
       } catch (err) {
