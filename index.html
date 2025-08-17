@@ -150,7 +150,138 @@ function fallbackToRaw(audioEl){
 
     if (folders.length === 0){
       container.innerHTML = `<div class="muted">Nenhum tema/pasta encontrado.</div>`;
-      return;
+      return;<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KingCast Podcast</title>
+  <style>
+    body{font-family:Arial, sans-serif;background:#f5f6f8;margin:0;padding:20px}
+    h1{text-align:center;margin:0 0 16px}
+    .cover{display:block;margin:0 auto 16px;max-width:240px;border-radius:12px}
+    .container{max-width:900px;margin:0 auto}
+    .muted{color:#666;font-size:12px}
+    .folder{background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.06);margin:12px 0;overflow:hidden}
+    .folder-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;cursor:pointer}
+    .folder-header:hover{background:#fafafa}
+    .folder-title{font-weight:700}
+    .chevron{transition:transform .2s ease}
+    .folder.open .chevron{transform:rotate(90deg)}
+    .folder-body{display:none;border-top:1px solid #eee;padding:8px 12px 14px}
+    .folder.open .folder-body{display:block}
+    .podcast{background:#fff;border:1px solid #eee;border-radius:10px;padding:12px;margin:10px 0}
+    .podcast h3{margin:0 0 6px;font-size:16px}
+    audio{width:100%;margin-top:6px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎙️ KingCast Podcast</h1>
+    <img src="kingCast.png" alt="Capa do Podcast" class="cover" />
+    <p class="muted">Clique em um tema para abrir e ouvir os áudios.</p>
+    <div id="folders"></div>
+  </div>
+
+<script>
+const repoOwner = "jhoelrodriguespodcast";
+const repoName  = "kingcast";
+let defaultBranch = "main";
+
+async function getDefaultBranch(){
+  const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`);
+  if(res.ok){
+    const data = await res.json();
+    defaultBranch = data.default_branch || "main";
+  }
+}
+
+// gera URL direta para o raw.githubusercontent.com
+function rawUrl(path){
+  return `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${defaultBranch}/${path}`;
+}
+
+function niceTitle(filename){
+  return filename.replace(/\.mp3$/i,'').replace(/[_\-]+/g,' ').trim();
+}
+
+async function listRoot(){
+  const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents`);
+  return res.json();
+}
+async function listFolder(url){
+  const res = await fetch(url);
+  return res.json();
+}
+
+function createFolderCard(folder){
+  const card = document.createElement('div');
+  card.className = 'folder';
+  card.dataset.loaded = 'false';
+
+  card.innerHTML = `
+    <div class="folder-header">
+      <div class="folder-title">📂 ${folder.name}</div>
+      <div class="chevron">▶</div>
+    </div>
+    <div class="folder-body">
+      <div class="muted">Carregando áudios…</div>
+    </div>
+  `;
+
+  const header = card.querySelector('.folder-header');
+  const body   = card.querySelector('.folder-body');
+
+  header.addEventListener('click', async () => {
+    const isOpen = card.classList.toggle('open');
+    if (isOpen && card.dataset.loaded === 'false') {
+      const files = await listFolder(folder.url);
+      const mp3s  = files.filter(f => f.type === 'file' && f.name.toLowerCase().endsWith('.mp3'));
+      if(mp3s.length === 0){
+        body.innerHTML = `<div class="muted">Nenhum áudio neste tema.</div>`;
+        card.dataset.loaded = 'true';
+        return;
+      }
+
+      const frag = document.createDocumentFragment();
+      mp3s.forEach(file => {
+        const div = document.createElement('div');
+        div.className = 'podcast';
+        div.innerHTML = `
+          <h3>${niceTitle(file.name)}</h3>
+          <audio controls preload="none">
+            <source src="${rawUrl(file.path)}" type="audio/mpeg">
+          </audio>
+        `;
+        frag.appendChild(div);
+      });
+
+      body.innerHTML = '';
+      body.appendChild(frag);
+      card.dataset.loaded = 'true';
+    }
+  });
+
+  return card;
+}
+
+(async function init(){
+  await getDefaultBranch();
+  const rootItems = await listRoot();
+  const folders = rootItems.filter(i => i.type === 'dir');
+
+  const container = document.getElementById('folders');
+  if (folders.length === 0){
+    container.innerHTML = `<div class="muted">Nenhum tema/pasta encontrado.</div>`;
+    return;
+  }
+
+  folders.forEach(f => container.appendChild(createFolderCard(f)));
+})();
+</script>
+</body>
+</html>
+
     }
 
     folders.forEach(f => container.appendChild(createFolderCard(f)));
