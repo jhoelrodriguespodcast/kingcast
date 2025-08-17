@@ -1,67 +1,62 @@
+<div id="folders"></div>
+
 <script>
   const repoOwner = "jhoelrodriguespodcast";
   const repoName = "kingcast";
-  const branch = "main"; // seu repositório está em main mesmo
+  const branch = "main";
 
-  async function loadFolder(folder) {
-    const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folder}?ref=${branch}`);
-    const files = await res.json();
+  async function loadFolder(folderName) {
+    try {
+      const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderName}?ref=${branch}`);
+      const files = await res.json();
 
-    const mp3Files = files.filter(file => file.name.toLowerCase().endsWith('.mp3'));
+      if (!Array.isArray(files)) {
+        document.getElementById("folders").innerHTML = `<p>Erro ao carregar: ${files.message}</p>`;
+        return;
+      }
 
-    const episodes = document.createElement("div");
-    episodes.className = "episodes";
+      const mp3Files = files.filter(file => file.name.toLowerCase().endsWith(".mp3"));
 
-    mp3Files.forEach(file => {
-      // Corrige espaços e acentos
-      const rawUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${branch}/${encodeURIComponent(file.path).replace(/%2F/g, '/')}`;
-
-      const epDiv = document.createElement("div");
-      epDiv.className = "podcast";
-      epDiv.innerHTML = `
-        <h3>${file.name.replace(/\.mp3$/i, '')}</h3>
-        <audio controls>
-          <source src="${rawUrl}" type="audio/mpeg">
-          Seu navegador não suporta áudio HTML5.
-        </audio>
-      `;
-      episodes.appendChild(epDiv);
-    });
-
-    return episodes;
-  }
-
-  async function loadFolders() {
-    const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents?ref=${branch}`);
-    const files = await res.json();
-
-    const folders = files.filter(file => file.type === "dir");
-    const container = document.getElementById("folders");
-
-    folders.forEach(folder => {
-      const div = document.createElement("div");
-      div.className = "folder";
+      const container = document.getElementById("folders");
+      const folderDiv = document.createElement("div");
+      folderDiv.className = "folder";
 
       const title = document.createElement("h2");
-      title.textContent = folder.name;
+      title.textContent = folderName;
 
       const episodesContainer = document.createElement("div");
       episodesContainer.className = "episodes";
       episodesContainer.style.display = "none";
 
-      title.addEventListener("click", async () => {
-        if (episodesContainer.childElementCount === 0) {
-          const episodes = await loadFolder(folder.name);
-          episodesContainer.appendChild(episodes);
-        }
+      // Quando clicar no nome da pasta
+      title.addEventListener("click", () => {
         episodesContainer.style.display = episodesContainer.style.display === "none" ? "block" : "none";
       });
 
-      div.appendChild(title);
-      div.appendChild(episodesContainer);
-      container.appendChild(div);
-    });
+      // Cria os players de áudio
+      mp3Files.forEach(file => {
+        const rawUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${branch}/${encodeURIComponent(file.path).replace(/%2F/g, "/")}`;
+        const epDiv = document.createElement("div");
+        epDiv.className = "podcast";
+        epDiv.innerHTML = `
+          <h3>${file.name.replace(/\.mp3$/i, "")}</h3>
+          <audio controls>
+            <source src="${rawUrl}" type="audio/mpeg">
+            Seu navegador não suporta áudio HTML5.
+          </audio>
+        `;
+        episodesContainer.appendChild(epDiv);
+      });
+
+      folderDiv.appendChild(title);
+      folderDiv.appendChild(episodesContainer);
+      container.appendChild(folderDiv);
+
+    } catch (err) {
+      document.getElementById("folders").innerHTML = `<p>Erro: ${err.message}</p>`;
+    }
   }
 
-  loadFolders();
+  // Carrega só a pasta "Deus"
+  loadFolder("Deus");
 </script>
