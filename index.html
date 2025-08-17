@@ -1,62 +1,82 @@
-<div id="folders"></div>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KingCast Podcast</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+    h1 { text-align: center; color: #333; }
+    .folder { background: #fff; padding: 15px; margin: 15px auto; border-radius: 10px; max-width: 600px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; }
+    .episodes { display: none; margin-top: 10px; }
+    .podcast { background: #fafafa; padding: 10px; margin: 10px 0; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    audio { width: 100%; margin-top: 5px; }
+    .cover { display: block; margin: 0 auto 10px; max-width: 100%; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <h1>🎙️ KingCast Podcast</h1>
+  <img src="kingCast.png" alt="Capa do Podcast" class="cover">
 
-<script>
-  const repoOwner = "jhoelrodriguespodcast";
-  const repoName = "kingcast";
-  const branch = "main";
+  <div id="folders"></div>
 
-  async function loadFolder(folderName) {
-    try {
-      const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderName}?ref=${branch}`);
-      const files = await res.json();
+  <script>
+    const repoOwner = "jhoelrodriguespodcast";
+    const repoName = "kingcast";
 
-      if (!Array.isArray(files)) {
-        document.getElementById("folders").innerHTML = `<p>Erro ao carregar: ${files.message}</p>`;
-        return;
+    async function loadFolder(folderName) {
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderName}`);
+        const files = await res.json();
+
+        const mp3Files = files.filter(file => file.name.toLowerCase().endsWith('.mp3'));
+        mp3Files.sort((a, b) => a.name.localeCompare(b.name));
+
+        const episodesDiv = document.getElementById(`episodes-${folderName}`);
+        episodesDiv.innerHTML = "";
+        mp3Files.forEach(file => {
+          const div = document.createElement("div");
+          div.className = "podcast";
+          div.innerHTML = `
+            <h3>${file.name.replace(/\.mp3$/i, '')}</h3>
+            <audio controls>
+              <source src="${file.download_url}" type="audio/mpeg">
+              Seu navegador não suporta áudio HTML5.
+            </audio>
+          `;
+          episodesDiv.appendChild(div);
+        });
+      } catch (err) {
+        console.error("Erro ao carregar episódios:", err);
       }
-
-      const mp3Files = files.filter(file => file.name.toLowerCase().endsWith(".mp3"));
-
-      const container = document.getElementById("folders");
-      const folderDiv = document.createElement("div");
-      folderDiv.className = "folder";
-
-      const title = document.createElement("h2");
-      title.textContent = folderName;
-
-      const episodesContainer = document.createElement("div");
-      episodesContainer.className = "episodes";
-      episodesContainer.style.display = "none";
-
-      // Quando clicar no nome da pasta
-      title.addEventListener("click", () => {
-        episodesContainer.style.display = episodesContainer.style.display === "none" ? "block" : "none";
-      });
-
-      // Cria os players de áudio
-      mp3Files.forEach(file => {
-        const rawUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${branch}/${encodeURIComponent(file.path).replace(/%2F/g, "/")}`;
-        const epDiv = document.createElement("div");
-        epDiv.className = "podcast";
-        epDiv.innerHTML = `
-          <h3>${file.name.replace(/\.mp3$/i, "")}</h3>
-          <audio controls>
-            <source src="${rawUrl}" type="audio/mpeg">
-            Seu navegador não suporta áudio HTML5.
-          </audio>
-        `;
-        episodesContainer.appendChild(epDiv);
-      });
-
-      folderDiv.appendChild(title);
-      folderDiv.appendChild(episodesContainer);
-      container.appendChild(folderDiv);
-
-    } catch (err) {
-      document.getElementById("folders").innerHTML = `<p>Erro: ${err.message}</p>`;
     }
-  }
 
-  // Carrega só a pasta "Deus"
-  loadFolder("Deus");
-</script>
+    function createFolderCard(folderName) {
+      const div = document.createElement("div");
+      div.className = "folder";
+      div.innerHTML = `
+        <h2>${folderName}</h2>
+        <div id="episodes-${folderName}" class="episodes"></div>
+      `;
+
+      div.addEventListener("click", async () => {
+        const episodesDiv = document.getElementById(`episodes-${folderName}`);
+        if (episodesDiv.style.display === "none" || episodesDiv.style.display === "") {
+          await loadFolder(folderName);
+          episodesDiv.style.display = "block";
+        } else {
+          episodesDiv.style.display = "none";
+        }
+      });
+
+      return div;
+    }
+
+    // Liste aqui todas as pastas que você tiver no repositório
+    const folders = ["Deus", "Cristo", "Igreja"];
+
+    const container = document.getElementById("folders");
+    folders.forEach(f => container.appendChild(createFolderCard(f)));
+  </script>
+</body>
+</html>
