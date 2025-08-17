@@ -1,148 +1,108 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>KingCast Podcast</title>
-<style>
-  body{font-family:Arial, sans-serif;background:#f5f6f8;margin:0;padding:20px}
-  h1{margin:0 0 20px;text-align:center}
-  .cover{display:block;margin:0 auto 16px;max-width:240px;border-radius:12px}
-  .container{max-width:900px;margin:0 auto}
-  .folder{background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.06);margin:12px 0;overflow:hidden}
-  .folder-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;cursor:pointer}
-  .folder-header:hover{background:#fafafa}
-  .folder-title{font-weight:700}
-  .chevron{transition:transform .2s ease}
-  .folder.open .chevron{transform:rotate(90deg)}
-  .folder-body{display:none;border-top:1px solid #eee;padding:8px 12px 14px}
-  .folder.open .folder-body{display:block}
-  .podcast{background:#fff;border:1px solid #eee;border-radius:10px;padding:12px;margin:10px 0}
-  .podcast h3{margin:0 0 6px;font-size:16px}
-  audio{width:100%}
-  .muted{color:#666;font-size:12px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KingCast Podcast</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+    h1 { text-align: center; color: #333; }
+    .cover { display: block; margin: 0 auto 20px; max-width: 100%; border-radius: 10px; }
+    .folder { background: #fff; margin: 10px auto; border-radius: 10px; max-width: 700px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .folder-header { padding: 15px; cursor: pointer; font-size: 1.2em; font-weight: bold; border-bottom: 1px solid #ddd; }
+    .folder-content { display: none; padding: 10px 15px; }
+    .podcast { margin-bottom: 15px; }
+    audio { width: 100%; margin-top: 5px; }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎙️ KingCast Podcast</h1>
-    <img src="kingCast.png" alt="Capa do Podcast" class="cover" />
+  <h1>🎙️ KingCast Podcast</h1>
+  <img src="kingCast.png" alt="Capa do Podcast" class="cover">
 
-    <p class="muted">Clique em um tema para ver/ocultar os áudios.</p>
-    <div id="folders"></div>
-  </div>
+  <div id="folders"></div>
 
-<script>
-const repoOwner = "jhoelrodriguespodcast";
-const repoName  = "kingcast";
+  <script>
+    const repoOwner = "jhoelrodriguespodcast";
+    const repoName = "kingcast";
 
-async function listRoot() {
-  const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents`);
-  if (!res.ok) throw new Error("Não foi possível listar o repositório.");
-  return res.json();
-}
+    // Função para formatar nomes
+    function niceTitle(name) {
+      return name.replace(/\.mp3$/i, '').replace(/[_-]/g, ' ');
+    }
 
-async function listFolder(folderUrl){
-  const res = await fetch(folderUrl);
-  if (!res.ok) throw new Error("Não foi possível listar a pasta.");
-  return res.json();
-}
+    // Accordion de abrir/fechar
+    function toggleFolder(folderId) {
+      const content = document.getElementById(folderId);
+      content.style.display = content.style.display === "block" ? "none" : "block";
+    }
 
-function niceTitle(filename){
-  return filename.replace(/\.mp3$/i,'').replace(/[_\-]+/g,' ').trim();
-}
+    // Função autoplay do próximo
+    function playNext(currentAudio) {
+      const allAudios = [...document.querySelectorAll("audio")];
+      const index = allAudios.indexOf(currentAudio);
+      if (index >= 0 && index < allAudios.length - 1) {
+        allAudios[index + 1].play();
+      }
+    }
 
-function createFolderCard(folder){
-  const card = document.createElement('div');
-  card.className = 'folder';
-  card.dataset.loaded = 'false';
+    async function loadFolders() {
+      try {
+        // Pega lista de pastas
+        const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents`);
+        const items = await res.json();
+        const folders = items.filter(i => i.type === "dir");
 
-  card.innerHTML = `
-    <div class="folder-header">
-      <div class="folder-title">📂 ${folder.name}</div>
-      <div class="chevron">▶</div>
-    </div>
-    <div class="folder-body">
-      <div class="muted">Carregando áudios…</div>
-    </div>
-  `;
+        const container = document.getElementById("folders");
 
-  const header = card.querySelector('.folder-header');
-  const body   = card.querySelector('.folder-body');
+        for (const folder of folders) {
+          const folderId = "folder_" + folder.name;
 
-  header.addEventListener('click', async () => {
-    // alterna visual
-    const isOpen = card.classList.toggle('open');
+          // Cria container da pasta
+          const folderDiv = document.createElement("div");
+          folderDiv.className = "folder";
+          folderDiv.innerHTML = `
+            <div class="folder-header" onclick="toggleFolder('${folderId}')">
+              📂 ${folder.name}
+            </div>
+            <div class="folder-content" id="${folderId}"></div>
+          `;
+          container.appendChild(folderDiv);
 
-    // se abriu agora e ainda não carregou, busca os mp3
-    if (isOpen && card.dataset.loaded === 'false') {
-      try{
-        const files = await listFolder(folder.url);
-        const mp3s  = files.filter(f => f.type === 'file' && f.name.toLowerCase().endsWith('.mp3'));
+          // Pega arquivos dentro da pasta
+          const resFiles = await fetch(folder.url);
+          const files = await resFiles.json();
+          const mp3Files = files.filter(f => f.name.toLowerCase().endsWith(".mp3"));
 
-        if (mp3s.length === 0) {
-          body.innerHTML = `<div class="muted">Nenhum áudio encontrado neste tema.</div>`;
-        } else {
-          // (opcional) ordenar por nome; se quiser por data de commit, dá pra buscar os commits aqui
-          mp3s.sort((a,b) => a.name.localeCompare(b.name, 'pt-BR', {numeric:true}));
+          // Ordena pelos commits mais recentes
+          const filesWithDate = await Promise.all(mp3Files.map(async file => {
+            const commitRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/commits?path=${file.path}&per_page=1`);
+            const commitData = await commitRes.json();
+            const date = new Date(commitData[0].commit.committer.date);
+            return { ...file, date };
+          }));
+          filesWithDate.sort((a, b) => b.date - a.date);
 
-          const frag = document.createDocumentFragment();
-          mp3s.forEach(file => {
-            const div = document.createElement('div');
-            div.className = 'podcast';
+          // Renderiza áudios dentro da pasta
+          const folderContent = document.getElementById(folderId);
+          filesWithDate.forEach(file => {
+            const div = document.createElement("div");
+            div.className = "podcast";
             div.innerHTML = `
               <h3>${niceTitle(file.name)}</h3>
-              <audio controls preload="none">
+              <audio controls preload="none" onended="playNext(this)">
                 <source src="${file.download_url}" type="audio/mpeg">
                 Seu navegador não suporta áudio HTML5.
               </audio>
             `;
-            frag.appendChild(div);
+            folderContent.appendChild(div);
           });
-          body.innerHTML = '';
-          body.appendChild(frag);
         }
-        card.dataset.loaded = 'true';
-      }catch(e){
-        body.innerHTML = `<div class="muted">Erro ao carregar: ${e.message}</div>`;
+      } catch (err) {
+        console.error("Erro ao carregar pastas:", err);
       }
     }
-  });
 
-  return card;
-}
-
-(async function init(){
-  try{
-    const rootItems = await listRoot();
-
-    // pega apenas pastas (temas). se quiser listar também MP3 soltos fora de pastas, dá pra tratar aqui.
-    const folders = rootItems.filter(i => i.type === 'dir');
-
-    const container = document.getElementById('folders');
-
-    // opcional: garantir que "Deus" apareça primeiro
-    folders.sort((a,b) => {
-      if (a.name.toLowerCase() === 'deus') return -1;
-      if (b.name.toLowerCase() === 'deus') return 1;
-      return a.name.localeCompare(b.name, 'pt-BR', {numeric:true});
-    });
-
-    if (folders.length === 0){
-      container.innerHTML = `<div class="muted">Nenhum tema/pasta encontrado.</div>`;
-      return;
-    }
-
-    folders.forEach(f => container.appendChild(createFolderCard(f)));
-
-    // Se quiser que a pasta "Deus" já apareça aberta na primeira carga:
-    // const deusCard = [...container.querySelectorAll('.folder')].find(c => c.querySelector('.folder-title')?.textContent.toLowerCase().includes('deus'));
-    // if (deusCard) deusCard.querySelector('.folder-header').click();
-
-  }catch(err){
-    document.getElementById('folders').innerHTML = `<div class="muted">Erro: ${err.message}</div>`;
-  }
-})();
-</script>
+    loadFolders();
+  </script>
 </body>
 </html>
