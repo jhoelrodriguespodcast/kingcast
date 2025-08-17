@@ -2,11 +2,11 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>KingCast Podcast</title>
   <style>
-    body{font-family:Arial, sans-serif;background:#f5f6f8;margin:0;padding:20px}
-    h1{text-align:center;margin:0 0 16px}
+    body{font-family:Arial,sans-serif;background:#f5f6f8;margin:0;padding:20px}
+    h1{text-align:center;color:#333;margin:0 0 16px}
     .cover{display:block;margin:0 auto 16px;max-width:240px;border-radius:12px}
     .container{max-width:900px;margin:0 auto}
     .muted{color:#666;font-size:12px}
@@ -20,15 +20,14 @@
     .folder.open .folder-body{display:block}
     .podcast{background:#fff;border:1px solid #eee;border-radius:10px;padding:12px;margin:10px 0}
     .podcast h3{margin:0 0 6px;font-size:16px}
-    audio{width:100%;margin-top:6px}
-    .err{color:#b00020;font-size:12px;margin-top:6px}
+    audio{width:100%}
   </style>
 </head>
 <body>
   <div class="container">
     <h1>🎙️ KingCast Podcast</h1>
     <img src="kingCast.png" alt="Capa do Podcast" class="cover" />
-    <p class="muted">Clique em um tema para ver/ocultar os áudios. Ao terminar um, o próximo do mesmo tema toca automaticamente.</p>
+    <p class="muted">Clique em um tema para ver/ocultar os áudios.</p>
     <div id="folders"></div>
   </div>
 
@@ -36,49 +35,24 @@
 const repoOwner = "jhoelrodriguespodcast";
 const repoName  = "kingcast";
 
-let defaultBranch = "main"; // será confirmado pela API
-
-async function getDefaultBranch(){
-  const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`);
-  if(res.ok){
-    const data = await res.json();
-    defaultBranch = data.default_branch || "main";
-  }
+async function listRoot() {
+  const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents`);
+  if (!res.ok) throw new Error("Não foi possível listar o repositório.");
+  return res.json();
 }
-
-// Util: monta a melhor URL possível pro áudio, com fallback
-function buildRawUrl(path){
-  return `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${defaultBranch}/${path}`;
+async function listFolder(folderUrl){
+  const res = await fetch(folderUrl);
+  if (!res.ok) throw new Error("Não foi possível listar a pasta.");
+  return res.json();
 }
-function buildMediaUrl(path){
-  return `https://media.githubusercontent.com/media/${repoOwner}/${repoName}/${defaultBranch}/${path}`;
-}
-function bestAudioUrl(file){
-  // Se a API já deu download_url, usamos; senão tentamos raw
-  return file.download_url || buildRawUrl(file.path);
-}
-
 function niceTitle(filename){
   return filename.replace(/\.mp3$/i,'').replace(/[_\-]+/g,' ').trim();
 }
 
-async function listRoot(){
-  const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents`);
-  if(!res.ok) throw new Error("Não foi possível listar o repositório.");
-  return res.json();
-}
-async function listFolder(url){
-  const res = await fetch(url);
-  if(!res.ok) throw new Error("Não foi possível listar a pasta.");
-  return res.json();
-}
-
-// Acordeão
 function createFolderCard(folder){
   const card = document.createElement('div');
   card.className = 'folder';
   card.dataset.loaded = 'false';
-
   card.innerHTML = `
     <div class="folder-header">
       <div class="folder-title">📂 ${folder.name}</div>
@@ -95,86 +69,39 @@ function createFolderCard(folder){
   header.addEventListener('click', async () => {
     const isOpen = card.classList.toggle('open');
 
-    // Carrega os áudios apenas quando abrir a primeira vez
     if (isOpen && card.dataset.loaded === 'false') {
       try{
         const files = await listFolder(folder.url);
         const mp3s  = files.filter(f => f.type === 'file' && f.name.toLowerCase().endsWith('.mp3'));
 
-        if(mp3s.length === 0){
+        if (mp3s.length === 0) {
           body.innerHTML = `<div class="muted">Nenhum áudio encontrado neste tema.</div>`;
-          card.dataset.loaded = 'true';
-          return;
-        }
+        } else {
+          // Ordena por nome; se quiser por data de commit dá para reativar depois
+          mp3s.sort((a,b) => a.name.localeCompare(b.name, 'pt-BR', {numeric:true}));
 
-        // Ordenar por data de commit (mais recente primeiro)
-        const withDate = await Promise.all(mp3s.map(async file => {
-          try{
-            const commitRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/commits?path=${file.path}&per_page=1`);
-            if(commitRes.ok){
-              const commitData = await commitRes.json();
-              const date = new Date(commitData[0].commit.committer.date);
-              return { ...file, date };
-            }
-          }catch(e){}
-          return { ...file, date: new Date(0) };
-        }));
-        withDate.sort((a,b) => b.date - a.date);
-
-        const frag = document.createDocumentFragment();
-
-        withDate.forEach(file => {
-          const div = document.createElement('div');
-          div.className = 'podcast';
-
-          // URL primária e alternativa
-          const primary = bestAudioUrl(file);
-          const fallback = buildMediaUrl(file.path);
-
-          // Criar elementos
-          const h3 = document.createElement('h3');
-          h3.textContent = niceTitle(file.name);
-
-          const audio = document.createElement('audio');
-          audio.setAttribute('controls','');
-          audio.setAttribute('preload','none');
-          audio.setAttribute('crossorigin','anonymous');
-          audio.dataset.primary = primary;
-          audio.dataset.fallback = fallback;
-          audio.src = primary;
-
-          // quando terminar, toca o próximo dentro da MESMA pasta
-          audio.addEventListener('ended', () => playNextInSameFolder(audio));
-
-          // erro de carregamento → tenta fallback (media.githubusercontent)
-          audio.addEventListener('error', () => {
-            // se já tentou fallback, mostra erro
-            if (audio.dataset.triedFallback === '1') {
-              showError(div, 'Não foi possível carregar este áudio. Baixe pelo link abaixo.');
-              return;
-            }
-            audio.dataset.triedFallback = '1';
-            audio.src = audio.dataset.fallback;
-            audio.load();
-            // tenta tocar após trocar a fonte
-            audio.play().catch(()=>{ /* ignora bloqueio de autoplay sem interação */ });
+          const frag = document.createDocumentFragment();
+          mp3s.forEach(file => {
+            // URL preferencial: servir do próprio Netlify (mesmo domínio)
+            const netlifyUrl = '/' + encodeURI(file.path); // ex.: /Deus/episodio%201.mp3
+            const div = document.createElement('div');
+            div.className = 'podcast';
+            div.innerHTML = `
+              <h3>${niceTitle(file.name)}</h3>
+              <audio
+                controls
+                preload="none"
+                src="${netlifyUrl}"
+                data-raw="${file.download_url}"
+                onended="playNext(this)"
+                onerror="fallbackToRaw(this)"
+              ></audio>
+            `;
+            frag.appendChild(div);
           });
-
-          // link de download (útil se o player não tocar)
-          const a = document.createElement('a');
-          a.href = primary;
-          a.target = "_blank";
-          a.rel = "noopener";
-          a.textContent = "Baixar este episódio";
-
-          div.appendChild(h3);
-          div.appendChild(audio);
-          div.appendChild(a);
-          frag.appendChild(div);
-        });
-
-        body.innerHTML = '';
-        body.appendChild(frag);
+          body.innerHTML = '';
+          body.appendChild(frag);
+        }
         card.dataset.loaded = 'true';
       }catch(e){
         body.innerHTML = `<div class="muted">Erro ao carregar: ${e.message}</div>`;
@@ -185,37 +112,36 @@ function createFolderCard(folder){
   return card;
 }
 
-function showError(container, msg){
-  let p = container.querySelector('.err');
-  if(!p){
-    p = document.createElement('p');
-    p.className = 'err';
-    container.appendChild(p);
+// Tocar o próximo áudio dentro da MESMA pasta
+function playNext(currentAudio) {
+  const container = currentAudio.closest('.folder-body');
+  if (!container) return;
+  const audios = [...container.querySelectorAll('audio')];
+  const i = audios.indexOf(currentAudio);
+  if (i >= 0 && i < audios.length - 1) {
+    audios[i + 1].play().catch(()=>{});
   }
-  p.textContent = msg;
 }
 
-// toca o próximo áudio dentro da mesma pasta
-function playNextInSameFolder(currentAudio){
-  const folderBody = currentAudio.closest('.folder-body');
-  if(!folderBody) return;
-  const audios = [...folderBody.querySelectorAll('audio')];
-  const idx = audios.indexOf(currentAudio);
-  if(idx >= 0 && idx < audios.length - 1){
-    const next = audios[idx + 1];
-    next.play().catch(()=>{ /* usuário precisa apertar play em alguns navegadores */ });
+// Fallback: se o arquivo do Netlify falhar (404), tenta o raw do GitHub
+function fallbackToRaw(audioEl){
+  if (audioEl.dataset.fallback === '1') return; // evita loop
+  const raw = audioEl.dataset.raw;
+  if (raw) {
+    audioEl.dataset.fallback = '1';
+    audioEl.src = raw;
+    audioEl.load();
+    // se o usuário clicou, respeita a intenção e tenta tocar
+    audioEl.play().catch(()=>{});
   }
 }
 
 (async function init(){
   try{
-    await getDefaultBranch();
     const rootItems = await listRoot();
     const folders = rootItems.filter(i => i.type === 'dir');
 
     const container = document.getElementById('folders');
-
-    // opcional: "Deus" primeiro
     folders.sort((a,b) => {
       if (a.name.toLowerCase() === 'deus') return -1;
       if (b.name.toLowerCase() === 'deus') return 1;
