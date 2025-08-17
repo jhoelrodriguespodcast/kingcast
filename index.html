@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KingCast Podcast</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
-    h1 { text-align: center; }
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+    h1 { text-align: center; color: #333; }
     .folder { background: #fff; padding: 15px; margin: 15px auto; border-radius: 10px;
               max-width: 600px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; }
+    .folder h2 { margin: 0; }
     .files { display: none; margin-top: 10px; }
-    .podcast { margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; }
+    .podcast { margin: 10px 0; }
     audio { width: 100%; margin-top: 5px; }
   </style>
 </head>
@@ -24,56 +25,58 @@
 
     async function loadFolders() {
       try {
-        // pega conteúdo da raiz do repositório
-        const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents`);
+        // Lista conteúdo do repositório (pasta raiz)
+        const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/`);
         const items = await res.json();
 
-        // só pastas
+        // Pega apenas pastas (como "Deus", etc.)
         const folders = items.filter(item => item.type === "dir");
+
         const container = document.getElementById("folders");
 
-        folders.forEach(folder => {
+        for (const folder of folders) {
           const folderDiv = document.createElement("div");
           folderDiv.className = "folder";
-          folderDiv.innerHTML = `<h2>${folder.name}</h2><div class="files"></div>`;
+          folderDiv.innerHTML = `<h2>${folder.name}</h2>`;
 
-          const filesDiv = folderDiv.querySelector(".files");
+          const filesDiv = document.createElement("div");
+          filesDiv.className = "files";
 
-          folderDiv.addEventListener("click", async () => {
-            if (filesDiv.style.display === "block") {
-              filesDiv.style.display = "none";
-              filesDiv.innerHTML = "";
-            } else {
-              filesDiv.style.display = "block";
-              filesDiv.innerHTML = "<p>Carregando...</p>";
+          // Buscar os arquivos dentro da pasta
+          const resFiles = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folder.name}`);
+          const files = await resFiles.json();
+          const mp3Files = files.filter(f => f.name.toLowerCase().endsWith(".mp3"));
 
-              const filesRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folder.name}`);
-              const files = await filesRes.json();
-              const mp3Files = files.filter(f => f.name.toLowerCase().endsWith(".mp3"));
+          mp3Files.forEach(file => {
+            const epDiv = document.createElement("div");
+            epDiv.className = "podcast";
 
-              // ordena por nome ou data (se quiser mais refinado dá pra pegar commits)
-              mp3Files.sort((a, b) => a.name.localeCompare(b.name));
+            // Gera link RAW do GitHub (streaming direto)
+            const rawUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${folder.name}/${file.name}`;
 
-              filesDiv.innerHTML = "";
-              mp3Files.forEach(file => {
-                const epDiv = document.createElement("div");
-                epDiv.className = "podcast";
-                epDiv.innerHTML = `
-                  <h3>${file.name.replace(/\.mp3$/i, '')}</h3>
-                  <audio controls>
-                    <source src="${file.download_url}" type="audio/mpeg">
-                    Seu navegador não suporta áudio HTML5.
-                  </audio>
-                `;
-                filesDiv.appendChild(epDiv);
-              });
-            }
+            epDiv.innerHTML = `
+              <h3>${file.name.replace(/\.mp3$/i, '')}</h3>
+              <audio controls>
+                <source src="${rawUrl}" type="audio/mpeg">
+                Seu navegador não suporta áudio HTML5.
+              </audio>
+            `;
+            filesDiv.appendChild(epDiv);
+          });
+
+          folderDiv.appendChild(filesDiv);
+
+          // Clicar no título da pasta abre/fecha lista
+          folderDiv.querySelector("h2").addEventListener("click", () => {
+            filesDiv.style.display = filesDiv.style.display === "none" ? "block" : "none";
           });
 
           container.appendChild(folderDiv);
-        });
+        }
       } catch (err) {
-        document.getElementById("folders").innerHTML = `Erro: ${err.message}`;
+        document.getElementById("folders").innerHTML = `
+          <p style="color:red;">Erro: ${err.message}</p>
+        `;
       }
     }
 
