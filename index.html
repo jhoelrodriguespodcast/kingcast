@@ -7,81 +7,96 @@
   <style>
     body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
     h1 { text-align: center; color: #333; }
-    .folder { background: #fff; padding: 15px; margin: 15px auto; border-radius: 10px; max-width: 600px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; }
-    .episodes { display: none; margin-top: 10px; }
-    .podcast { background: #fafafa; padding: 10px; margin: 10px 0; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .folder { background: #fff; margin: 10px auto; border-radius: 10px; max-width: 700px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .folder-header { padding: 15px; cursor: pointer; font-weight: bold; border-bottom: 1px solid #ddd; }
+    .episodes { display: none; padding: 15px; }
+    .podcast { margin-bottom: 15px; }
     audio { width: 100%; margin-top: 8px; }
   </style>
 </head>
 <body>
   <h1>🎙️ KingCast Podcast</h1>
-  <img src="kingCast.png" alt="Capa do Podcast" class="cover">
-
   <div id="folders"></div>
 
   <script>
     const repoOwner = "jhoelrodriguespodcast";
     const repoName = "kingcast";
-    const folders = ["Deus"]; // aqui você pode adicionar outros temas futuramente
 
-    async function loadFolder(folder) {
-      const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folder}`);
-      const files = await res.json();
-
-      // filtra só .mp3
-      const mp3Files = files.filter(file => file.name.toLowerCase().endsWith(".mp3"));
-
-      // ordena pela data do commit mais recente
-      const filesWithDate = await Promise.all(mp3Files.map(async file => {
-        const commitRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/commits?path=${file.path}&per_page=1`);
-        const commitData = await commitRes.json();
-        const date = new Date(commitData[0].commit.committer.date);
-        return { ...file, date };
-      }));
-      filesWithDate.sort((a, b) => b.date - a.date);
-
-      return filesWithDate;
+    // Pausar outros áudios quando um começar
+    function setupAudioControl() {
+      const audios = document.querySelectorAll("audio");
+      audios.forEach(audio => {
+        audio.addEventListener("play", () => {
+          audios.forEach(other => {
+            if (other !== audio) other.pause();
+          });
+        });
+      });
     }
 
-    function createFolderCard(folderName, episodes) {
-      const div = document.createElement("div");
-      div.className = "folder";
-      div.innerHTML = `<h2>${folderName}</h2>`;
+    async function loadFolders() {
+      try {
+        // Lista raiz do repositório
+        const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents`);
+        const items = await res.json();
 
-      const epContainer = document.createElement("div");
-      epContainer.className = "episodes";
+        // Apenas pastas
+        const folders = items.filter(item => item.type === "dir");
 
-      episodes.forEach(file => {
-        const epDiv = document.createElement("div");
-        epDiv.className = "podcast";
-        epDiv.innerHTML = `
-          <h3>${file.name.replace(/\.mp3$/i, "")}</h3>
-          <audio controls>
-            <source src="https://cdn.jsdelivr.net/gh/${repoOwner}/${repoName}/${folderName}/${encodeURIComponent(file.name)}" type="audio/mpeg">
-            Seu navegador não suporta áudio HTML5.
-          </audio>
-        `;
-        epContainer.appendChild(epDiv);
-      });
+        const container = document.getElementById("folders");
+        for (const folder of folders) {
+          const div = document.createElement("div");
+          div.className = "folder";
 
-      div.appendChild(epContainer);
+          // Cabeçalho da pasta
+          const header = document.createElement("div");
+          header.className = "folder-header";
+          header.textContent = "📂 " + folder.name;
+          div.appendChild(header);
 
-      // abre/fecha ao clicar
-      div.querySelector("h2").addEventListener("click", () => {
-        epContainer.style.display = epContainer.style.display === "none" ? "block" : "none";
-      });
+          // Container dos áudios
+          const episodes = document.createElement("div");
+          episodes.className = "episodes";
+          div.appendChild(episodes);
 
-      return div;
-    }
+          // Toggle abrir/fechar
+          header.addEventListener("click", async () => {
+            if (episodes.style.display === "block") {
+              episodes.style.display = "none";
+              episodes.innerHTML = "";
+            } else {
+              episodes.style.display = "block";
+              // Carregar arquivos dessa pasta
+              const resFiles = await fetch(folder.url);
+              const files = await resFiles.json();
 
-    (async function init() {
-      const container = document.getElementById("folders");
-      for (let folder of folders) {
-        const episodes = await loadFolder(folder);
-        const card = createFolderCard(folder, episodes);
-        container.appendChild(card);
+              const mp3Files = files.filter(f => f.name.toLowerCase().endsWith(".mp3"));
+              episodes.innerHTML = "";
+              mp3Files.forEach(file => {
+                const rawUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${file.path}`;
+                const epDiv = document.createElement("div");
+                epDiv.className = "podcast";
+                epDiv.innerHTML = `
+                  <h3>${file.name.replace(/\.mp3$/i, '')}</h3>
+                  <audio controls>
+                    <source src="${rawUrl}" type="audio/mpeg">
+                    Seu navegador não suporta áudio HTML5.
+                  </audio>
+                `;
+                episodes.appendChild(epDiv);
+              });
+              setupAudioControl();
+            }
+          });
+
+          container.appendChild(div);
+        }
+      } catch (err) {
+        document.getElementById("folders").innerHTML = `<p>Erro: ${err.message}</p>`;
       }
-    })();
+    }
+
+    loadFolders();
   </script>
 </body>
 </html>
