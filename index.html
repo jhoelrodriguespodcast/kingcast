@@ -1,128 +1,37 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>KingCast - Página Principal</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f7f7f7;
-      margin: 0;
-      padding: 20px;
-      color: #333;
+<div class="subscribe">
+  <h2>Siga e receba novidades</h2>
+  <form id="subscribeForm">
+    <input type="email" name="email" placeholder="Digite seu email" required>
+    <button type="submit">Seguir</button>
+  </form>
+  <p id="message"></p>
+</div>
+
+<script>
+  document.getElementById("subscribeForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const email = e.target.email.value;
+    let cidade = "Desconhecida";
+    try {
+      const resp = await fetch("https://ipapi.co/json/");
+      const data = await resp.json();
+      cidade = data.city || cidade;
+    } catch {
+      console.warn("Erro ao buscar cidade pelo IP.");
     }
 
-    header img {
-      max-width: 200px;
-      margin-bottom: 20px;
-    }
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwSAMouySWAIrfjZZXuCC0HpYaEI3kS7amSf6fAx13syxRRWvy_TUlIQ1ORw7KUiqynLQ/exec";
 
-    h1 {
-      margin-bottom: 30px;
-    }
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("cidade", cidade);
 
-    .buttons {
-      margin: 30px 0;
-    }
-
-    .buttons a {
-      display: inline-block;
-      margin: 10px;
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      color: #fff;
-      background: #007acc;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: background 0.3s;
-    }
-
-    .buttons a:hover {
-      background: #005f99;
-    }
-
-    .subscribe {
-      margin-top: 40px;
-    }
-
-    .subscribe input[type="email"] {
-      padding: 10px;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      width: 250px;
-    }
-
-    .subscribe button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      color: #fff;
-      background: #28a745;
-      border: none;
-      border-radius: 6px;
-      margin-left: 10px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .subscribe button:hover {
-      background: #1e7e34;
-    }
-
-    .message {
-      margin-top: 15px;
-      font-size: 0.95rem;
-      color: #007acc;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <img src="KingCast.png" alt="Logo KingCast" />
-    <h1>Bem-vindo ao KingCast</h1>
-  </header>
-
-  <div class="buttons">
-    <a href="deus/index.html">📖 Deus</a>
-    <a href="jesus/index.html">✝️ Jesus</a>
-  </div>
-
-  <div class="subscribe">
-    <h2>Siga e receba novidades</h2>
-    <form id="subscribeForm">
-      <input type="email" name="email" placeholder="Digite seu e-mail" required />
-      <button type="submit">Seguir</button>
-    </form>
-    <div class="message" id="message"></div>
-  </div>
-
-  <script>
-    document.getElementById("subscribeForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-
-      const email = e.target.email.value;
-      const messageEl = document.getElementById("message");
-
-      // 👉 substitua pela URL do seu Google Apps Script
-      const scriptURL = "COLE_AQUI_SUA_URL_DO_APPS_SCRIPT";
-
-      fetch(scriptURL, {
-        method: "POST",
-        body: new URLSearchParams({ "email": email })
-      })
-      .then(response => {
-        if (response.ok) {
-          messageEl.textContent = "✅ Obrigado por seguir!";
-          e.target.reset();
-        } else {
-          messageEl.textContent = "❌ Ocorreu um erro. Tente novamente.";
-        }
-      })
-      .catch(() => {
-        messageEl.textContent = "⚠️ Erro de conexão.";
-      });
+    await fetch(scriptURL, {
+      method: "POST",
+      body: formData
     });
-  </script>
-</body>
-</html>
+
+    document.getElementById("message").textContent = "Obrigado por seguir! 🎉";
+    e.target.reset();
+  });
+</script>
