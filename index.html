@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KingCast - Página Principal</title>
+  <title>KingCast</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,33 +13,29 @@
       padding: 20px;
       color: #333;
     }
+
     header img {
       max-width: 200px;
       margin-bottom: 20px;
     }
+
     h1 {
       margin-bottom: 20px;
     }
-    .links {
-      margin-top: 30px;
+
+    h2 {
+      margin-top: 40px;
+      color: #007acc;
     }
-    .links a {
-      display: inline-block;
-      margin: 15px;
-      padding: 15px 25px;
-      font-size: 1.2rem;
-      color: #fff;
-      background: #007acc;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: background 0.3s;
+
+    iframe {
+      margin: 15px auto;
+      display: block;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
     }
-    .links a:hover {
-      background: #005f99;
-    }
-    .form-container {
-      margin-top: 50px;
-    }
+
     input[type="email"] {
       padding: 10px;
       width: 250px;
@@ -47,6 +43,7 @@
       border-radius: 6px;
       margin-right: 10px;
     }
+
     button {
       padding: 10px 20px;
       font-size: 1rem;
@@ -57,7 +54,32 @@
       cursor: pointer;
       transition: background 0.3s;
     }
+
     button:hover {
+      background: #005f99;
+    }
+
+    .form-container {
+      margin-top: 40px;
+    }
+
+    nav {
+      margin-top: 40px;
+    }
+
+    nav a {
+      display: inline-block;
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      color: #fff;
+      background: #007acc;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    nav a:hover {
       background: #005f99;
     }
   </style>
@@ -68,12 +90,11 @@
     <h1>Bem-vindo ao KingCast</h1>
   </header>
 
-  <div class="links">
-    <a href="jesus.html">🎙 Episódios sobre Jesus</a>
-    <a href="deus.html">🎙 Episódios sobre Deus</a>
-  </div>
+  <nav>
+    <a href="jesus/index.html">Episódios sobre Jesus</a>
+    <a href="deus/index.html">Episódios sobre Deus</a>
+  </nav>
 
-  <!-- Formulário de email -->
   <div class="form-container">
     <h2>Siga e receba novidades</h2>
     <form id="followForm">
