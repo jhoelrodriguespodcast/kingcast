@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Jesus - KingCast</title>
+  <title>KingCast - Página Principal</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -19,98 +19,110 @@
     }
 
     h1 {
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
 
-    iframe {
-      margin: 20px auto;
-      display: block;
-      border-radius: 12px;
+    .buttons {
+      margin: 30px 0;
     }
 
-    .back-button {
+    .buttons a {
       display: inline-block;
-      margin-top: 40px;
-      padding: 10px 20px;
-      font-size: 1rem;
+      margin: 10px;
+      padding: 15px 30px;
+      font-size: 1.2rem;
       color: #fff;
       background: #007acc;
-      border-radius: 6px;
+      border-radius: 8px;
       text-decoration: none;
       transition: background 0.3s;
     }
 
-    .back-button:hover {
+    .buttons a:hover {
       background: #005f99;
     }
 
-    .follow-box {
+    .subscribe {
       margin-top: 40px;
-      padding: 20px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      display: inline-block;
     }
 
-    input[type="email"] {
+    .subscribe input[type="email"] {
       padding: 10px;
+      font-size: 1rem;
       border: 1px solid #ccc;
       border-radius: 6px;
       width: 250px;
     }
 
-    button {
+    .subscribe button {
       padding: 10px 20px;
-      margin-left: 10px;
-      background: #007acc;
+      font-size: 1rem;
       color: #fff;
+      background: #28a745;
       border: none;
       border-radius: 6px;
+      margin-left: 10px;
       cursor: pointer;
+      transition: background 0.3s;
     }
 
-    button:hover {
-      background: #005f99;
+    .subscribe button:hover {
+      background: #1e7e34;
+    }
+
+    .message {
+      margin-top: 15px;
+      font-size: 0.95rem;
+      color: #007acc;
     }
   </style>
 </head>
 <body>
   <header>
-    <img src="../KingCast.png" alt="Logo KingCast" />
-    <h1>Episódios sobre Jesus</h1>
+    <img src="KingCast.png" alt="Logo KingCast" />
+    <h1>Bem-vindo ao KingCast</h1>
   </header>
 
-  <!-- Players -->
-  <iframe src="https://open.spotify.com/embed/episode/35q1zOrBmsCB0EHu04ymWh?utm_source=generator" width="100%" height="232" frameBorder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+  <div class="buttons">
+    <a href="deus/index.html">📖 Deus</a>
+    <a href="jesus/index.html">✝️ Jesus</a>
+  </div>
 
-  <iframe src="https://open.spotify.com/embed/episode/0glLBC6gb1cS9eZ0D5HRRl?si=Zx34Mw76QU24ukKfMjlY1A" width="100%" height="232" frameBorder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
-
-  <iframe src="https://open.spotify.com/embed/episode/4SdpAuFwc67eSueiS6L7gV?si=bb531142aba948d8" width="100%" height="232" frameBorder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
-
-  <a href="../index.html" class="back-button">⬅ Voltar para a Página Principal</a>
-
-  <!-- Form Seguir -->
-  <div class="follow-box">
-    <h2>Quer receber novidades dos episódios sobre Jesus?</h2>
-    <input type="email" id="email-jesus" placeholder="Digite seu email" required>
-    <button onclick="seguir('Jesus', 'email-jesus')">🔔 Seguir</button>
+  <div class="subscribe">
+    <h2>Siga e receba novidades</h2>
+    <form id="subscribeForm">
+      <input type="email" name="email" placeholder="Digite seu e-mail" required />
+      <button type="submit">Seguir</button>
+    </form>
+    <div class="message" id="message"></div>
   </div>
 
   <script>
-    function seguir(origem, campoId) {
-      let email = document.getElementById(campoId).value;
-      if (!email) {
-        alert("Por favor, digite seu email.");
-        return;
-      }
+    document.getElementById("subscribeForm").addEventListener("submit", function(e) {
+      e.preventDefault();
 
-      fetch("SUA_URL_DO_WEBAPP", {
+      const email = e.target.email.value;
+      const messageEl = document.getElementById("message");
+
+      // 👉 substitua pela URL do seu Google Apps Script
+      const scriptURL = "COLE_AQUI_SUA_URL_DO_APPS_SCRIPT";
+
+      fetch(scriptURL, {
         method: "POST",
-        body: JSON.stringify({ email: email, origem: origem })
+        body: new URLSearchParams({ "email": email })
       })
-      .then(() => alert("Obrigado por seguir os episódios sobre " + origem + "!"));
-    }
+      .then(response => {
+        if (response.ok) {
+          messageEl.textContent = "✅ Obrigado por seguir!";
+          e.target.reset();
+        } else {
+          messageEl.textContent = "❌ Ocorreu um erro. Tente novamente.";
+        }
+      })
+      .catch(() => {
+        messageEl.textContent = "⚠️ Erro de conexão.";
+      });
+    });
   </script>
 </body>
 </html>
