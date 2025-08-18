@@ -1,65 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>KingCast</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcast sobre Jesus</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      background: #f7f7f7;
+      background: #f4f4f4;
       margin: 0;
       padding: 20px;
+    }
+    h1 {
       color: #333;
     }
-
-    header img {
-      max-width: 300px;
-      width: 100%;
-      height: auto;
-      margin: 0 auto 20px;
-      display: block;
-    }
-
-    h1 {
-      margin-bottom: 30px;
-      font-size: 2rem;
-    }
-
-    .buttons {
+    iframe {
+      border-radius: 12px;
       margin-top: 20px;
-    }
-
-    .buttons a {
-      display: inline-block;
-      margin: 10px;
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      color: #fff;
-      background: #007acc;
-      border-radius: 6px;
-      text-decoration: none;
-      transition: background 0.3s;
-    }
-
-    .buttons a:hover {
-      background: #005f99;
     }
   </style>
 </head>
 <body>
-  <header>
-    <img src="kingcast.png" alt="Logo KingCast" />
-    <h1>Bem-vindo ao KingCast</h1>
-  </header>
+  <h1>Episódio sobre Jesus</h1>
+  
+  <!-- Player do Spotify -->
+  <iframe style="border-radius:12px" 
+          src="https://open.spotify.com/embed/episode/0glLBC6gb1cS9eZ0D5HRRl?utm_source=generator" 
+          width="100%" 
+          height="232" 
+          frameborder="0" 
+          allowfullscreen="" 
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+          loading="lazy">
+  </iframe>
 
-  <div class="buttons">
-    <a href="Deus/index.html">Deus</a>
-    <a href="VoltadeJesus/index.html">Escatologia</a>
-    <a href="Jesus/index.html">Jesus</a>
-    <a href="EspiritoSanto/index.html">Espírito Santo</a>
-    <a href="Salvacao/index.html">Salvação</a>
-    <a href="Pecado/index.html">Pecado</a>
-  </div>
+  <p><a href="../index.html">⬅️ Voltar para página principal</a></p>
 </body>
 </html>
