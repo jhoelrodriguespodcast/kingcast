@@ -1,133 +1,33 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KingCast - Página Principal</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f7f7f7;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
+<script>
+document.getElementById("followForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const email = document.getElementById("email").value;
+  let cidade = "Desconhecida";
+  let ip = "";
 
-    header img {
-      max-width: 200px;
-      margin-bottom: 20px;
-    }
+  try {
+    const resp = await fetch("https://ipapi.co/json/");
+    const data = await resp.json();
+    cidade = data.city || cidade;
+    ip = data.ip || "";
+  } catch {
+    console.warn("Erro ao obter cidade/IP");
+  }
 
-    h1 {
-      margin-bottom: 30px;
-    }
+  const scriptURL = "https://script.google.com/macros/s/AKfycbzImoosd1gIzK-MZQmgxpojl_0tXUEFRHNowiI5VPi0JnWbwXl3kTYaeMkHQSe5A2wdjg/exec";
 
-    .links {
-      margin: 40px 0;
-    }
+  const formData = new FormData();
+  formData.append("email", email);
+  formData.append("cidade", cidade);
+  formData.append("ip", ip);
 
-    .links a {
-      display: inline-block;
-      margin: 15px;
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      color: #fff;
-      background: #007acc;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: background 0.3s;
-    }
+  const response = await fetch(scriptURL, { method: "POST", body: formData });
 
-    .links a:hover {
-      background: #005f99;
-    }
-
-    .form-container {
-      margin-top: 40px;
-    }
-
-    input[type="email"] {
-      padding: 10px;
-      width: 250px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      margin-right: 10px;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      color: #fff;
-      background: #007acc;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    button:hover {
-      background: #005f99;
-    }
-
-    #msg {
-      margin-top: 15px;
-      font-weight: bold;
-      color: green;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <img src="KingCast.png" alt="Logo KingCast" />
-    <h1>Bem-vindo ao KingCast</h1>
-  </header>
-
-  <div class="links">
-    <a href="deus/index.html">🎧 Episódios sobre Deus</a>
-    <a href="jesus/index.html">🎧 Episódios sobre Jesus</a>
-  </div>
-
-  <!-- Formulário de email -->
-  <div class="form-container">
-    <h2>Siga e receba novidades</h2>
-    <form id="followForm">
-      <input type="email" id="email" name="email" placeholder="Digite seu email" required>
-      <button type="submit">Seguir</button>
-    </form>
-    <p id="msg"></p>
-  </div>
-
-  <!-- Script -->
-  <script>
-    document.getElementById("followForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-      let cidade = "Desconhecida";
-      let ip = "";
-
-      try {
-        const resp = await fetch("https://ipapi.co/json/");
-        const data = await resp.json();
-        cidade = data.city || cidade;
-        ip = data.ip || "";
-      } catch (error) {
-        console.warn("Não foi possível capturar cidade/IP", error);
-      }
-
-      const scriptURL = "https://script.google.com/macros/s/AKfycbzImoosd1gIzK-MZQmgxpojl_0tXUEFRHNowiI5VPi0JnWbwXl3kTYaeMkHQSe5A2wdjg/exec";
-
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("cidade", cidade);
-      formData.append("ip", ip);
-
-      await fetch(scriptURL, { method: "POST", body: formData });
-
-      document.getElementById("msg").textContent = "Obrigado por seguir! 🎉";
-      document.getElementById("followForm").reset();
-    });
-  </script>
-</body>
-</html>
-
+  if (response.ok) {
+    document.getElementById("msg").textContent = "Obrigado por seguir! 🎉";
+    e.target.reset();
+  } else {
+    document.getElementById("msg").textContent = "Erro ao enviar. Tente novamente.";
+  }
+});
+</script>
