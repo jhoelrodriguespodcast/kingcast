@@ -3,17 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KingCast</title>
+  <title>KingCast - Página Principal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    header img {
+      max-width: 200px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    .links {
+      margin: 40px 0;
+    }
+
+    .links a {
+      display: inline-block;
+      margin: 15px;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      color: #fff;
+      background: #007acc;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+
+    .links a:hover {
+      background: #005f99;
+    }
+
+    .form-container {
+      margin-top: 40px;
+    }
+
+    input[type="email"] {
+      padding: 10px;
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      color: #fff;
+      background: #007acc;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #005f99;
+    }
+
+    #msg {
+      margin-top: 15px;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
 </head>
 <body>
-  <h1>Siga e receba novidades</h1>
-  <form id="followForm">
-    <input type="email" id="email" name="email" placeholder="Digite seu email" required>
-    <button type="submit">Seguir</button>
-  </form>
-  <p id="msg"></p>
+  <header>
+    <img src="KingCast.png" alt="Logo KingCast" />
+    <h1>Bem-vindo ao KingCast</h1>
+  </header>
 
-  <!-- Aqui entra o script que envia para o Google Apps Script -->
+  <div class="links">
+    <a href="deus/index.html">🎧 Episódios sobre Deus</a>
+    <a href="jesus/index.html">🎧 Episódios sobre Jesus</a>
+  </div>
+
+  <!-- Formulário de email -->
+  <div class="form-container">
+    <h2>Siga e receba novidades</h2>
+    <form id="followForm">
+      <input type="email" id="email" name="email" placeholder="Digite seu email" required>
+      <button type="submit">Seguir</button>
+    </form>
+    <p id="msg"></p>
+  </div>
+
+  <!-- Script -->
   <script>
     document.getElementById("followForm").addEventListener("submit", async function(e) {
       e.preventDefault();
@@ -22,7 +107,6 @@
       let ip = "";
 
       try {
-        // Pega localização e IP
         const resp = await fetch("https://ipapi.co/json/");
         const data = await resp.json();
         cidade = data.city || cidade;
@@ -31,7 +115,6 @@
         console.warn("Não foi possível capturar cidade/IP", error);
       }
 
-      // URL do seu Apps Script
       const scriptURL = "https://script.google.com/macros/s/AKfycbzImoosd1gIzK-MZQmgxpojl_0tXUEFRHNowiI5VPi0JnWbwXl3kTYaeMkHQSe5A2wdjg/exec";
 
       const formData = new FormData();
