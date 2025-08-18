@@ -13,20 +13,33 @@
       padding: 20px;
       color: #333;
     }
-
     header img {
       max-width: 200px;
       margin-bottom: 20px;
     }
-
     h1 {
       margin-bottom: 20px;
     }
-
-    .form-container {
-      margin-top: 40px;
+    .links {
+      margin-top: 30px;
     }
-
+    .links a {
+      display: inline-block;
+      margin: 15px;
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      color: #fff;
+      background: #007acc;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+    .links a:hover {
+      background: #005f99;
+    }
+    .form-container {
+      margin-top: 50px;
+    }
     input[type="email"] {
       padding: 10px;
       width: 250px;
@@ -34,7 +47,6 @@
       border-radius: 6px;
       margin-right: 10px;
     }
-
     button {
       padding: 10px 20px;
       font-size: 1rem;
@@ -45,38 +57,21 @@
       cursor: pointer;
       transition: background 0.3s;
     }
-
     button:hover {
       background: #005f99;
-    }
-
-    .links {
-      margin-top: 50px;
-    }
-
-    .links a {
-      display: block;
-      margin: 10px 0;
-      font-size: 1.2rem;
-      color: #007acc;
-      text-decoration: none;
-    }
-
-    .links a:hover {
-      text-decoration: underline;
-    }
-
-    #msg {
-      margin-top: 15px;
-      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <header>
     <img src="KingCast.png" alt="Logo KingCast" />
-    <h1>Bem-vindo ao KingCast 🎙️</h1>
+    <h1>Bem-vindo ao KingCast</h1>
   </header>
+
+  <div class="links">
+    <a href="jesus.html">🎙 Episódios sobre Jesus</a>
+    <a href="deus.html">🎙 Episódios sobre Deus</a>
+  </div>
 
   <!-- Formulário de email -->
   <div class="form-container">
@@ -88,14 +83,6 @@
     <p id="msg"></p>
   </div>
 
-  <!-- Links para páginas de episódios -->
-  <div class="links">
-    <h2>Episódios</h2>
-    <a href="paginas/jesus.html">📖 Episódios sobre Jesus</a>
-    <a href="paginas/deus.html">✨ Episódios sobre Deus</a>
-  </div>
-
-  <!-- Script -->
   <script>
     document.getElementById("followForm").addEventListener("submit", async function(e) {
       e.preventDefault();
@@ -119,17 +106,13 @@
       formData.append("cidade", cidade);
       formData.append("ip", ip);
 
-      try {
-        const response = await fetch(scriptURL, { method: "POST", body: formData });
+      const response = await fetch(scriptURL, { method: "POST", body: formData });
 
-        if (response.ok) {
-          document.getElementById("msg").textContent = "Obrigado por seguir! 🎉";
-          e.target.reset();
-        } else {
-          document.getElementById("msg").textContent = "Erro ao enviar. Tente novamente.";
-        }
-      } catch (error) {
-        document.getElementById("msg").textContent = "Erro de conexão.";
+      if (response.ok) {
+        document.getElementById("msg").textContent = "Obrigado por seguir! 🎉";
+        e.target.reset();
+      } else {
+        document.getElementById("msg").textContent = "Erro ao enviar. Tente novamente.";
       }
     });
   </script>
