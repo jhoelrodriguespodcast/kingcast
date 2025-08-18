@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Deus - KingCast</title>
   <style>
     body {
@@ -23,9 +24,38 @@
     }
 
     iframe {
-      margin: 20px auto;
+      margin: 15px auto;
       display: block;
       border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .form-container {
+      margin-top: 40px;
+    }
+
+    input[type="email"] {
+      padding: 10px;
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      color: #fff;
+      background: #007acc;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #005f99;
     }
 
     .back-button {
@@ -43,36 +73,6 @@
     .back-button:hover {
       background: #005f99;
     }
-
-    .follow-box {
-      margin-top: 40px;
-      padding: 20px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      display: inline-block;
-    }
-
-    input[type="email"] {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      width: 250px;
-    }
-
-    button {
-      padding: 10px 20px;
-      margin-left: 10px;
-      background: #007acc;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #005f99;
-    }
   </style>
 </head>
 <body>
@@ -81,32 +81,61 @@
     <h1>Episódios sobre Deus</h1>
   </header>
 
-  <!-- Aqui entram os players do Spotify -->
-  <iframe src="https://open.spotify.com/embed/episode/XXXXXXXXX" width="100%" height="232" frameBorder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+  <!-- Episódios -->
+  <iframe src="https://open.spotify.com/embed/episode/0CvU1KqBpn8nNMV0IrNNg6?utm_source=generator" 
+    height="152" frameborder="0" allowfullscreen 
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
 
-  <a href="../index.html" class="back-button">⬅ Voltar para a Página Principal</a>
+  <iframe src="https://open.spotify.com/embed/episode/2VPTtr2iJEq2ueG2xIZQqy?utm_source=generator" 
+    height="152" frameborder="0" allowfullscreen 
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
 
-  <!-- Form Seguir -->
-  <div class="follow-box">
-    <h2>Quer receber novidades dos episódios sobre Deus?</h2>
-    <input type="email" id="email-deus" placeholder="Digite seu email" required>
-    <button onclick="seguir('Deus', 'email-deus')">🔔 Seguir</button>
+  <iframe src="https://open.spotify.com/embed/episode/1l3TloiW0KQH8RdymXSrYN?utm_source=generator" 
+    height="152" frameborder="0" allowfullscreen 
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+
+  <iframe src="https://open.spotify.com/embed/episode/64NWkPxmUCmT155JLwgpoN?utm_source=generator" 
+    height="152" frameborder="0" allowfullscreen 
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+
+  <iframe src="https://open.spotify.com/embed/episode/0oyrugXfdp7Qo7tnDfjCRa?utm_source=generator" 
+    height="152" frameborder="0" allowfullscreen 
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+
+  <iframe src="https://open.spotify.com/embed/episode/7nkBSntS4R58YJaDf66jRA?utm_source=generator" 
+    height="152" frameborder="0" allowfullscreen 
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+
+  <!-- Formulário de email -->
+  <div class="form-container">
+    <h2>Siga e receba novidades</h2>
+    <form id="followForm">
+      <input type="email" id="email" name="email" placeholder="Digite seu email" required>
+      <button type="submit">Seguir</button>
+    </form>
+    <p id="msg"></p>
   </div>
 
-  <script>
-    function seguir(origem, campoId) {
-      let email = document.getElementById(campoId).value;
-      if (!email) {
-        alert("Por favor, digite seu email.");
-        return;
-      }
+  <!-- Botão voltar -->
+  <a href="../index.html" class="back-button">⬅ Voltar para a Página Principal</a>
 
-      fetch("SUA_URL_DO_WEBAPP", {
+  <script>
+    document.getElementById("followForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+
+      // Substituir pela URL do seu Google Apps Script
+      const scriptURL = "SUA_URL_DO_APPS_SCRIPT_AQUI"; 
+
+      const response = await fetch(scriptURL, {
         method: "POST",
-        body: JSON.stringify({ email: email, origem: origem })
-      })
-      .then(() => alert("Obrigado por seguir os episódios sobre " + origem + "!"));
-    }
+        body: new FormData(this)
+      });
+
+      document.getElementById("msg").textContent = "Obrigado por seguir! 🎉";
+      document.getElementById("followForm").reset();
+    });
   </script>
 </body>
 </html>
+
