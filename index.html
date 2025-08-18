@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>KingCast</title>
   <style>
     body {
@@ -14,54 +14,97 @@
     }
 
     header img {
-      max-width: 300px;
-      width: 100%;
-      height: auto;
-      margin: 0 auto 20px;
-      display: block;
+      max-width: 200px;
+      margin-bottom: 20px;
     }
 
     h1 {
-      margin-bottom: 30px;
-      font-size: 2rem;
+      margin-bottom: 20px;
     }
 
-    .buttons {
-      margin-top: 20px;
+    ul {
+      list-style: none;
+      padding: 0;
     }
 
-    .buttons a {
-      display: inline-block;
-      margin: 10px;
-      padding: 15px 30px;
-      font-size: 1.2rem;
-      color: #fff;
-      background: #007acc;
-      border-radius: 6px;
+    ul li {
+      margin: 15px 0;
+    }
+
+    a {
       text-decoration: none;
-      transition: background 0.3s;
+      font-size: 1.2rem;
+      color: #007acc;
     }
 
-    .buttons a:hover {
+    a:hover {
+      color: #005f99;
+    }
+
+    /* Form seguir */
+    .follow-box {
+      margin-top: 40px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: inline-block;
+    }
+
+    input[type="email"] {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 250px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-left: 10px;
+      background: #007acc;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
       background: #005f99;
     }
   </style>
 </head>
 <body>
   <header>
-    <img src="kingcast.png" alt="Logo KingCast" />
+    <img src="KingCast.png" alt="Logo KingCast" />
     <h1>Bem-vindo ao KingCast</h1>
   </header>
 
-  <div class="buttons">
-    <a href="Deus/index.html">Deus</a>
-    <a href="Jesus/index.html">Jesus</a>
-    <a href="Escatologia/index.html">Escatologia🔨</a>
-    <a href="EspiritoSanto/index.html">Espírito Santo 🔨</a>
-    <a href="Salvacao/index.html">Salvação 🔨</a>
-    <a href="Pecado/index.html">Pecado 🔨</a>
+  <ul>
+    <li><a href="deus/index.html">🎧 Episódios sobre Deus</a></li>
+    <li><a href="jesus/index.html">🎧 Episódios sobre Jesus</a></li>
+  </ul>
+
+  <!-- Form Seguir -->
+  <div class="follow-box">
+    <h2>Quer receber novidades do KingCast?</h2>
+    <input type="email" id="email-principal" placeholder="Digite seu email" required>
+    <button onclick="seguir('Principal', 'email-principal')">🔔 Seguir</button>
   </div>
+
+  <script>
+    function seguir(origem, campoId) {
+      let email = document.getElementById(campoId).value;
+      if (!email) {
+        alert("Por favor, digite seu email.");
+        return;
+      }
+
+      fetch("SUA_URL_DO_WEBAPP", {
+        method: "POST",
+        body: JSON.stringify({ email: email, origem: origem })
+      })
+      .then(() => alert("Obrigado por seguir o KingCast!"));
+    }
+  </script>
 </body>
 </html>
-
-
