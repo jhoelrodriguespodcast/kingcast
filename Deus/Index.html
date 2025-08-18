@@ -119,23 +119,7 @@
   <!-- Botão voltar -->
   <a href="../index.html" class="back-button">⬅ Voltar para a Página Principal</a>
 
-  <script>
-    document.getElementById("followForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-
-      // Substituir pela URL do seu Google Apps Script
-      const scriptURL = "SUA_URL_DO_APPS_SCRIPT_AQUI"; 
-
-      const response = await fetch(scriptURL, {
-        method: "POST",
-        body: new FormData(this)
-      });
-
-      document.getElementById("msg").textContent = "Obrigado por seguir! 🎉";
-      document.getElementById("followForm").reset();
-    });
-  </script>
+ <!-- Botão voltar -->
+  <a href="../index.html" class="back-button">⬅ Voltar para a Página Principal</a>
 </body>
 </html>
-
