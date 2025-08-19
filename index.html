@@ -105,6 +105,28 @@
   </div>
 
   <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxjWjRSdh_7VvDFbkdQMZ2UeMDi8VyP7p4l8sGKx3NExR2QI8fNAy24p0iT5GIJxch7Jg/exec";
+
+    // 🔹 Quando usuário acessar o site → grava visita
+    (async function registrarVisita() {
+      let cidade = "Desconhecida";
+      let ip = "";
+
+      try {
+        const resp = await fetch("https://ipapi.co/json/");
+        const data = await resp.json();
+        cidade = data.city || cidade;
+        ip = data.ip || "";
+      } catch {
+        console.warn("Erro ao obter cidade/IP");
+      }
+
+      // Envia para Apps Script via GET
+      const url = `${scriptURL}?cidade=${encodeURIComponent(cidade)}&ip=${encodeURIComponent(ip)}`;
+      fetch(url);
+    })();
+
+    // 🔹 Quando usuário enviar email no formulário
     document.getElementById("followForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const email = document.getElementById("email").value;
@@ -119,8 +141,6 @@
       } catch {
         console.warn("Erro ao obter cidade/IP");
       }
-
-      const scriptURL = "https://script.google.com/macros/s/AKfycby6J1Qj7PRVaxNJ-vo9ocfpRp5nVxzOLjdLsYU6K17-b9LL5Y6VHn0JCPylzId-uJzqpA/exec";
 
       const formData = new FormData();
       formData.append("email", email);
@@ -139,8 +159,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
